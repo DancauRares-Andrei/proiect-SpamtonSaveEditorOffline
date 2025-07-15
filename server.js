@@ -217,6 +217,48 @@ app.post('/deltarune1Demo/upload', upload.single('saveFile'), async (req, res) =
     res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
   }
 });
+app.use(express.urlencoded({ extended: true })); // ca să parseze form-urlencoded
+
+app.post('/deltarune1Demo/savefile/update', async (req, res) => {
+  try {
+    const ROOT_DIRECTORY = __dirname; // sau alt path dacă ai alt director rădăcină
+    const inputPath = path.join(__dirname, 'defaultSaves', 'demo', 'filech1_0');
+    const outputPath = path.join(ROOT_DIRECTORY, 'filech1_0');
+
+    // Verifică dacă fișierul de intrare există
+    try {
+      await fs.access(inputPath);
+    } catch {
+      return res.status(500).send('Fișierul original filech1_0_demo nu există.');
+    }
+
+    // Citește liniile
+    const lines = (await fs.readFile(inputPath, 'utf8')).split(/\r?\n/);
+
+    // Actualizează liniile conform formData
+    for (const key in req.body) {
+      if (key.startsWith('_')) {
+        const index = parseInt(key.slice(1)) - 1;
+        const value = req.body[key];
+        if (!isNaN(index) && index >= 0 && index < lines.length) {
+          lines[index] = value;
+        }
+      }
+    }
+
+    // Scrie noul fișier
+    await fs.writeFile(outputPath, lines.join('\n'), 'utf8');
+
+    // Trimite fișierul înapoi ca download
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename="filech1_0"');
+    res.sendFile(outputPath);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Eroare internă la procesarea fișierului.');
+  }
+});
 // Pentru orice alt path care nu se găsește, trimite 404
 app.use((req, res) => {
   res.status(404).send('Fișierul nu a fost găsit.');
