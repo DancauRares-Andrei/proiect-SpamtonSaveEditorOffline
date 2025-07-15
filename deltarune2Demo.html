@@ -1,0 +1,255 @@
+
+<html>
+<head>
+  <title>Spamton Save Editor - Deltarune Chapter 2</title>
+
+
+  <meta name = "keywords" content = "Deltarune, Undertale, Toby Fox, Save File, Editor">
+  <meta name = "description" content = "A Save file editor for Deltarune Chapter 2 Demo.">
+  <meta name = "author" content = "">
+  <meta http-equiv = "content-type" content = "text/html; charset = UTF-8">
+
+  <meta property="og:title" content="Spamton Save Editor" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://saveeditor.spamton.com/" />
+  <meta property="og:image" content="https://saveeditor.spamton.com/images/thumb.png" />
+  <meta property="og:description" content="A Save file editor for Deltarune Chapter 2 Demo." />
+  <meta name="theme-color" content="#000000">
+
+
+
+  <link rel="icon" href="https://spamton.com/favicon.ico">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <!--<script src="/socket.io/socket.io.js"></script>-->
+
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&display=swap" rel="stylesheet">
+
+<script>
+
+$(function(){
+  var droppedFile;
+  
+  $(".submitButton").on('click',function(){
+    console.log(window.location.href);
+    var form = $(this).parent();
+
+    //if(form.find("#categoryName").val() !== "" && form.find("#categoryEndDate").val() !== "" && form.find("#categoryStartDate").val() !== "" && form.find("#categoryMaxUploads").val() !== ""){
+      var formdata = false;
+      if (window.FormData){
+          formdata = new FormData(form[0]);
+      }
+      if(droppedFile != null){
+        formdata = new FormData();
+        formdata.append("saveFile", droppedFile);
+      }
+      //formdata = droppedFiles;
+      $.ajax({
+          url         : '/deltarune2Demo/upload',
+          data        : formdata ? formdata : form.serialize(),
+          cache       : false,
+          contentType : false,
+          processData : false,
+          type        : 'POST',
+        success: function (data) {
+          if(data.err){
+            alert(data.err);
+          }
+          else{
+            window.location.href = data.url;
+          }
+        }
+      });
+    //}else{alert("Please fill out all the fields!");}
+
+  });
+
+  $('#uploadForm').submit(function(e) {
+      e.preventDefault();
+    });
+    
+    
+    $("#saveFile").on('change',function(){
+      droppedFile = null;
+      curText = $('#saveFile')[0].files[0].name;
+      $("#saveFileText").html(curText);
+    });
+    
+    var curText = `Choose a file<br>or drag it here.`;
+    
+    $("#saveFileLabel").on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    })
+    .on('dragover dragenter', function() {
+      $("#saveFileText").html("Drop to upload!");
+      $("#saveFileLabel").css({"background-color":"#094149"});
+    })
+    .on('dragleave dragend drop', function() {
+      $("#saveFileText").html(curText);
+      $("#saveFileLabel").css({"background-color":"inherit"});
+    })
+    .on('drop', function(e) {
+      droppedFile = e.originalEvent.dataTransfer.files[0];
+      curText = e.originalEvent.dataTransfer.files[0].name;
+      $("#saveFileText").html(curText);
+      $('#saveFile').val('');
+      //alert(e.originalEvent.dataTransfer.files[0]);
+    });
+
+    if($('#saveFile')[0].files[0] != undefined){
+      //clear the upload cache
+      $('#saveFile').val('');
+      /*droppedFile = null;
+      curText = $('#saveFile')[0].files[0].name;
+      $("#saveFileText").html(curText);*/
+    }
+    
+    $("#classicForm").on('click',function(){
+      $("#saveFileLabel").css({"display":"none"});
+      $("#saveFile").css({"width":"inherit","height":"inherit","padding":"25px"});
+    });
+
+});
+
+
+
+</script>
+
+
+  <style>
+
+body{
+  background-color:#000000;
+  color:#FFFFFF;
+  font-size:1.5vw;
+  font-family: 'Ubuntu', sans-serif;
+  width:100%;
+  height:100%;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+
+.submitButton{
+  cursor:pointer;
+  padding:5px 10px;
+  border-width:3px;
+  border-color:#FFFFFF;
+  border-style:solid;
+  margin: 10px;
+  display:inline-block;
+}
+
+#defaultSave{
+  font-size:0.7em;
+}
+
+a, a:visited, a:hover, a:active{
+  color:#2db4d2;
+  text-decoration: inherit;
+}
+
+#saveExplination{
+  font-size:0.8em;
+}
+
+#chapterWrapper{
+  
+}
+
+.chapter{
+  padding: 10px 30px;
+}
+
+#wrapper{
+  max-width:900px;
+  margin: 0 auto;
+}
+
+#saveFile{
+  width:0px;
+  height:0px;
+  overflow:hidden;
+}
+
+#saveFileLabel{
+  display:inline-block;
+  position:relative;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  position:relative;
+  cursor:pointer;
+  width:500px;
+  height:200px;
+}
+
+#saveFileText{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events: none;
+}
+
+#classicForm{
+  font-size:0.7em;
+  cursor: pointer;
+  color:#4dd4d2;
+}
+
+  </style>
+</head>
+<body>
+  
+  
+  <center><h1>Spamton Save Editor</h1>
+  <div id='chapterWrapper'>
+  <span class='chapter'><a href='/deltarune1Demo.html'>Chapter 1 Demo</a></span>
+  <span class='chapter'><a href='/deltarune2Demo.html'>Chapter 2 Demo</a></span>
+  <span class='chapter'><a href='/deltarune1.html'>Main Game</a></span>
+  </div>
+  
+  </center>
+<br><hr>  <br><br>
+
+<div id='wrapper'>
+  <center>Upload your Deltarune <b>Chapter 2 Demo</b> Save File</center>
+  <br><br>
+  Always back up your save file before making any modifications.<br>
+  There is a chance that any modifications will irreversibly break your save.
+  <br><br>
+<br><br>
+
+  <div id='saveExplination'>
+  Save files for Deltarune are stored in the Local AppData directory on Windows.<br>
+  <b>%LocalAppData%/DELTARUNE</b>
+  <br><br>
+  Chapter 2 Save files are the following:<br>
+  SLOT 1 - <b>filech2_0</b><br>
+  SLOT 2 - <b>filech2_1</b><br>
+  SLOT 3 - <b>filech2_2</b><br>
+  </div>
+
+  <br><br>
+  <center><form action="/deltarune1/upload" enctype="multipart/form-data" method="post" id='uploadForm'>
+    <label for="saveFile"><div id="saveFileLabel">
+      
+      <div id='saveFileText'>
+        Choose a file<br>
+        or drag it here.
+      </div>
+      
+    </div></label>
+    <input type="file" id='saveFile' class="form-control-file" name="saveFile">
+    <br>
+    <div class='submitButton'>Upload File</div>
+  </form></center>
+  
+</div>
+
+</body>
+</html>
+
