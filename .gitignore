@@ -55,5 +55,4 @@ bower_components/
 # Mac system files
 .DS_Store
 
-filech1_0
-filech2_0
+output/
