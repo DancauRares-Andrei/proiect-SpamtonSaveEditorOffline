@@ -10,17 +10,13 @@ const ROOT_DIRECTORY = path.join(__dirname, './');
 // Servește static toate fișierele din ROOT_DIRECTORY
 app.use(express.static(ROOT_DIRECTORY));
 
-// Dacă cineva cere '/', trimite index.html automat (express.static face asta implicit, dar să fim expliciți)
-/*app.get('/', (req, res) => {
-  res.sendFile(path.join(ROOT_DIRECTORY, 'public/index.html'));
-});*/
-
-app.post('/deltarune1Demo/upload', upload.single('saveFile'), async (req, res) => {
+async function processUploadChapter1(req, res, htmlTemplateFile, outputFile) {
   try {
     const fileBuffer = req.file.buffer;
     const lines = fileBuffer.toString().split(/\r?\n/);
-
-    // Exemplu: iau valoarea de la anumite linii
+    if (lines.length != 10318) {
+      return res.json({ err: `Not a valid Chapter 1 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 10318 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
+    }
     const saveData = {
 
       "_1": lines[0]?.trim() || '',
@@ -195,34 +191,41 @@ app.post('/deltarune1Demo/upload', upload.single('saveFile'), async (req, res) =
       "_10318": lines[10317]?.trim() || '',
     };
 
-    // Citește fișierul HTML original
-    const htmlTemplatePath = path.join(__dirname, 'html', 'deltarune1DemoEdit.html');
+
+    const htmlTemplatePath = path.join(__dirname, 'html', htmlTemplateFile);
     let htmlContent = await fs.readFile(htmlTemplatePath, 'utf8');
 
-    // Înlocuiește linia care conține var saveData = {...};
     htmlContent = htmlContent.replace(
       /var\s+saveData\s*=\s*\{[^}]*\};/,
       `var saveData = ${JSON.stringify(saveData)};`
     );
 
-    // Scrie fișierul temporar
-    const tempFilePath = path.join(__dirname, 'output','Gdeltarune1DemoEdit.html');
-    await fs.writeFile(tempFilePath, htmlContent);
+    const outputPath = path.join(__dirname, 'output', outputFile);
+    await fs.writeFile(outputPath, htmlContent);
 
-    // Trimite link către fișierul generat
-    res.json({ url: '/output/Gdeltarune1DemoEdit.html' });
+    res.json({ url: `/output/${outputFile}` });
 
   } catch (err) {
     console.error(err);
     res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
   }
+}
+app.post('/deltarune1Demo/upload', upload.single('saveFile'), async (req, res) => {
+  await processUploadChapter1(req, res, 'deltarune1DemoEdit.html', 'Gdeltarune1DemoEdit.html');
 });
-app.post('/deltarune2Demo/upload', upload.single('saveFile'), async (req, res) => {
-  try {
+
+app.post('/deltarune1/upload', upload.single('saveFile'), async (req, res) => {
+  await processUploadChapter1(req, res, 'deltarune1Edit.html', 'Gdeltarune1Edit.html');
+});
+
+async function processUploadChapter2(req, res, htmlTemplateFile, outputFile) {
+    try {
     const fileBuffer = req.file.buffer;
     const lines = fileBuffer.toString().split(/\r?\n/);
-
-    // Exemplu: iau valoarea de la anumite linii
+    
+    if (lines.length != 3055) {
+      return res.json({ err: `Not a valid Chapter 1 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 3055 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
+    }
     const saveData = {
 
       "_1": lines[0]?.trim() || '',
@@ -584,48 +587,47 @@ app.post('/deltarune2Demo/upload', upload.single('saveFile'), async (req, res) =
       "_3055": lines[3054]?.trim() || '',
     };
 
-
-    // Citește fișierul HTML original
-    const htmlTemplatePath = path.join(__dirname, 'html', 'deltarune2DemoEdit.html');
+    const htmlTemplatePath = path.join(__dirname, 'html', htmlTemplateFile);
     let htmlContent = await fs.readFile(htmlTemplatePath, 'utf8');
 
-    // Înlocuiește linia care conține var saveData = {...};
     htmlContent = htmlContent.replace(
       /var\s+saveData\s*=\s*\{[^}]*\};/,
       `var saveData = ${JSON.stringify(saveData)};`
     );
 
-    // Scrie fișierul temporar
-    const tempFilePath = path.join(__dirname, 'output','Gdeltarune2DemoEdit.html');
+    const tempFilePath = path.join(__dirname, 'output', outputFile);
     await fs.writeFile(tempFilePath, htmlContent);
 
-    // Trimite link către fișierul generat
-    res.json({ url: '/output/Gdeltarune2DemoEdit.html' });
+    res.json({ url: `/output/${outputFile}` });
 
   } catch (err) {
     console.error(err);
     res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
   }
+}
+app.post('/deltarune2Demo/upload', upload.single('saveFile'), async (req, res) => {
+  await processUploadChapter2(req, res, 'deltarune2DemoEdit.html', 'Gdeltarune2DemoEdit.html');
 });
-app.use(express.urlencoded({ extended: true })); // ca să parseze form-urlencoded
 
-app.post('/deltarune1Demo/savefile/update', async (req, res) => {
+app.post('/deltarune2/upload', upload.single('saveFile'), async (req, res) => {
+  await processUploadChapter2(req, res, 'deltarune2Edit.html', 'Gdeltarune2Edit.html');
+});
+app.use(express.urlencoded({ extended: true }));
+
+async function handleSavefileUpdate(req, res, inputFilename, mode) {
   try {
-    const ROOT_DIRECTORY = __dirname; 
-    const inputPath = path.join(__dirname, 'defaultSaves', 'demo', 'filech1_0');
-    const outputPath = path.join(ROOT_DIRECTORY, 'output', 'filech1_0');
+    const ROOT_DIRECTORY = __dirname;
+    const inputPath = path.join(ROOT_DIRECTORY, 'defaultSaves', mode, inputFilename);
+    const outputPath = path.join(ROOT_DIRECTORY, 'output', inputFilename);
 
-    // Verifică dacă fișierul de intrare există
     try {
       await fs.access(inputPath);
     } catch {
-      return res.status(500).send('Fișierul original filech1_0_demo nu există.');
+      return res.status(500).send(`Fișierul original ${inputFilename} (${mode}) nu există.`);
     }
 
-    // Citește liniile
     const lines = (await fs.readFile(inputPath, 'utf8')).split(/\r?\n/);
 
-    // Actualizează liniile conform formData
     for (const key in req.body) {
       if (key.startsWith('_')) {
         const index = parseInt(key.slice(1)) - 1;
@@ -636,57 +638,33 @@ app.post('/deltarune1Demo/savefile/update', async (req, res) => {
       }
     }
 
-    // Scrie noul fișier
     await fs.writeFile(outputPath, lines.join('\n'), 'utf8');
 
-    // Trimite fișierul înapoi ca download
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', 'attachment; filename="filech1_0"');
-    res.sendFile(outputPath);
+    return res.json({ url: `/output/${inputFilename}` });
 
   } catch (err) {
     console.error(err);
-    res.status(500).send('Eroare internă la procesarea fișierului.');
+    return res.status(500).send('Eroare internă la procesarea fișierului.');
   }
+}
+
+app.post('/deltarune1Demo/savefile/update', (req, res) => {
+  handleSavefileUpdate(req, res, 'filech1_0', 'demo');
 });
-app.post('/deltarune2Demo/savefile/update', async (req, res) => {
-  try {
-    const ROOT_DIRECTORY = __dirname; 
-    const inputPath = path.join(__dirname, 'defaultSaves', 'demo', 'filech2_0');
-    const outputPath = path.join(ROOT_DIRECTORY, 'output', 'filech2_0');
 
-    // Verifică dacă fișierul de intrare există
-    try {
-      await fs.access(inputPath);
-    } catch {
-      return res.status(500).send('Fișierul original filech2_0_demo nu există.');
-    }
-
-    // Citește liniile
-    const lines = (await fs.readFile(inputPath, 'utf8')).split(/\r?\n/);
-
-    // Actualizează liniile conform formData
-    for (const key in req.body) {
-      if (key.startsWith('_')) {
-        const index = parseInt(key.slice(1)) - 1;
-        const value = req.body[key];
-        if (!isNaN(index) && index >= 0 && index < lines.length) {
-          lines[index] = value;
-        }
-      }
-    }
-
-    // Scrie noul fișier
-    await fs.writeFile(outputPath, lines.join('\n'), 'utf8');
-
-    // Trimite fișierul înapoi ca download
-    res.json({ url: '/output/filech2_0' });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Eroare internă la procesarea fișierului.');
-  }
+app.post('/deltarune2Demo/savefile/update', (req, res) => {
+  handleSavefileUpdate(req, res, 'filech2_0', 'demo');
 });
+
+app.post('/deltarune1/savefile/update', (req, res) => {
+  handleSavefileUpdate(req, res, 'filech1_0', 'full');
+});
+
+app.post('/deltarune2/savefile/update', (req, res) => {
+  handleSavefileUpdate(req, res, 'filech2_0', 'full');
+});
+
+
 // Pentru orice alt path care nu se găsește, trimite 404
 app.use((req, res) => {
   res.status(404).send('Fișierul nu a fost găsit.');

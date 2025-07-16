@@ -1,3 +1,4 @@
+
 <html>
 <head>
   <title>Spamton Save Editor - Edit Save File</title>
@@ -12,7 +13,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://saveeditor.spamton.com/" />
     <meta property="og:image" content="https://saveeditor.spamton.com/images/thumb.png" />
-    <meta property="og:description" content="A Save file editor for Deltarune Chapter 1 Demo" />
+    <meta property="og:description" content="A Save file editor for Deltarune Chapter 1" />
     <meta name="theme-color" content="#000000">
     
     <meta name="robots" content="noindex,nofollow">
@@ -25,10 +26,10 @@
 <script src="/lib/jquery-ui.min.js"></script>
   <!--<script src="/socket.io/socket.io.js"></script>-->
 <script src="/lib/jquery.tancolor.js"></script>
-  <link href="/lib/css2" rel="stylesheet">
+  <link href="/css/css2.css" rel="stylesheet">
 
 <script src="/lib/FileSaver.min.js"></script>
-<script src="/js/dataNames1Demo.js?nocache=101"></script>
+<script src="/js/dataNames.js?nocache=101"></script>
 <script src="/js/generateInput.js?nocache=101"></script>
 <script src="/js/extraFunctions.js?nocache=101"></script>
 <script src="/js/generateFormCh1.js?nocache=101"></script>
@@ -129,12 +130,12 @@ $(function(){
   function updateDownloadChapter(){
     var save_type = $(`select[name='public_save_type']`).val();
     console.log(save_type);
-    var public_href = '/dl/1752508072971/687526a817c67992e66386e5/filech2_0';
+    var public_href = '/dl/1752675225126/6877b39917c67992e6655d19/filech1_0';
     var public_text = "Public Save File Link";
 
     if(save_type == 2){
 
-      var oldFile = "filech2_0";
+      var oldFile = "filech1_0";
       var convertName = oldFile;
       if(convertName.indexOf('filech1') != -1){
         convertName = convertName.replace('filech1','filech2');
@@ -142,7 +143,7 @@ $(function(){
         convertName = "filech2_0";
       }
 
-      public_href = `/dl/1752508072971/687526a817c67992e66386e5/ch2/${convertName}`;
+      public_href = `/dl/1752675225126/6877b39917c67992e6655d19/ch2/${convertName}`;
       public_text = "Public Save File Link (Converted to Chapter 2)";
     }
 
@@ -194,11 +195,11 @@ $(function(){
 
     if($(this).attr('name') == "show_all_rooms"){
       if(this.checked){
-        $(".room_id").html(generateSelectCh2(`_10317`,"Room ID",$(`select[name="_10317"]`).val(),rooms_all));
+        $(".room_id").html(generateSelectCh1(`_10317`,"Room ID",$(`select[name="_10317"]`).val(),rooms_all));
 
       }else{
 
-        $(".room_id").html(generateSelectCh2(`_10317`,"Room ID",$(`select[name="_10317"]`).val(),roomsCh1));
+        $(".room_id").html(generateSelectCh1(`_10317`,"Room ID",$(`select[name="_10317"]`).val(),roomsCh1));
 
       }
 
@@ -442,24 +443,24 @@ switchTab("tab_main");
 
   SetValidParty($(`select[name="_8"]`).val(),$(`select[name="_9"]`).val(),$(`select[name="_10"]`).val());
 
-  $(".submitButton").on('click', function () {
-      var formdata = parseFormData(); 
-      var encodedData = $.param(formdata);
-
+  $(".submitButton").on('click',function(){
+    var formdata = parseFormData();
       $.ajax({
-        url: `/deltarune1Demo/savefile/update`,
-        data: encodedData,
-        type: 'POST',
-        contentType: 'application/x-www-form-urlencoded',
+          url         : `/deltarune1/savefile/update`,
+          data        : formdata,
+          cache       : false,
+          type        : 'POST',
         success: function (data) {
-          console.log('Aici!');
-          window.location.href = data.url;
-        },
-        error: function (xhr) {
-          alert("Eroare la generarea fișierului: " + xhr.statusText);
+          if(data.err){
+            alert(data.err);
+          }
+          else{
+            window.location = data.url;
+          }
         }
       });
-    });
+
+  });
 
 
   $('#uploadForm').submit(function(e) {
@@ -534,6 +535,18 @@ switchTab("tab_main");
 <center><div class='submitButton'>Download</div></center>
 </div>
 
+<br>
+<center>
+<br><br>
+<br><br><br>
+
+<br><br>
+</center>
+
+<br><br><br><br><br>
+
+<center>
+</center>
 
 
 </body>
