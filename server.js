@@ -7,7 +7,6 @@ const app = express();
 const PORT = 8080;
 const ROOT_DIRECTORY = path.join(__dirname, './');
 
-// Servește static toate fișierele din ROOT_DIRECTORY
 app.use(express.static(ROOT_DIRECTORY));
 
 async function processUploadChapter1(req, res, htmlTemplateFile, outputFile) {
@@ -1507,16 +1506,9 @@ app.post('/deltarune3/savefile/update', (req, res) => {
 app.post('/deltarune4/savefile/update', (req, res) => {
   handleSavefileUpdate(req, res, 'filech4_0', 'full');
 });
-/*Capitol 3:
 
-Capitol 4:
-
-
-*/
-
-// Pentru orice alt path care nu se găsește, trimite 404
 app.use((req, res) => {
-  res.status(404).send('Fișierul nu a fost găsit.');
+  res.status(404).send('Neimplementat.');
 });
 app.listen(PORT, () => {
   console.log(`Serverul a pornit. Ascultă pe http://localhost:${PORT}/`);

@@ -3,21 +3,6 @@
 <head>
   <title>Spamton Save Editor - Edit Save File</title>
 
-
-    <meta name = "keywords" content = "Deltarune, Undertale, Toby Fox, Save File, Editor">
-    <meta name = "description" content = "Save file edit link. Valid for 24 hours after upload time.">
-    <meta name = "author" content = "">
-    <meta http-equiv = "content-type" content = "text/html; charset = UTF-8">
-
-    <meta property="og:title" content="Spamton Save Editor" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://saveeditor.spamton.com/" />
-    <meta property="og:image" content="https://saveeditor.spamton.com/images/thumb.png" />
-    <meta property="og:description" content="A Save file editor for Deltarune Chapter 4" />
-    <meta name="theme-color" content="#000000">
-
-    <meta name="robots" content="noindex,nofollow">
-
   <link rel="icon" href="/favicon.ico">
   <script src="/lib/jquery.min.js"></script>
   <link rel="stylesheet" href="/css/deltarune2savefile.css">
@@ -131,7 +116,7 @@ $(function(){
   function updateDownloadChapter(){
     var save_type = $(`select[name='public_save_type']`).val();
 
-    var public_href = '/dl/1752680251194/6877c73b17c67992e6656a4c/filech3_0';
+    var public_href = '';
     var public_text = "Public Save File Link";
 
     if(save_type == 1){
@@ -144,7 +129,7 @@ $(function(){
         convertName = "filech1_0";
       }
 
-      public_href = `/dl/1752680251194/6877c73b17c67992e6656a4c/ch1/${convertName}`;
+      public_href = ``;
       public_text = "Public Save File Link (Converted to Chapter 1)";
     }
 
