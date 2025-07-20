@@ -52,4 +52,5 @@ bower_components/
 # Mac system files
 .DS_Store
 
-output/
+output/*
+!output/.gitkeep
