@@ -16,16 +16,18 @@ app.use(session({
   saveUninitialized: true
 }));
 
-async function processUploadChapter1(req, res, htmlTemplateFile, outputFile) {
+async function processUpload(req, res, arr, htmlTemplateFile, outputFile) {
   try {
     const fileBuffer = req.file.buffer;
     const originalName = req.file.originalname;
     req.session.originalSaveFileName = originalName;
     const lines = fileBuffer.toString().split(/\r?\n/);
-    if (lines.length != 10318) {
-      return res.json({ err: `Not a valid Chapter 1 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 10318 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
+    if (lines.length != arr[0]) {  
+      return res.json({ err: `Not a valid Chapter ${arr[1]}  save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting ${arr[0]} lines, file has ${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
     }
-
+    const tempPath = path.join(__dirname, 'output', req.file.originalname+'.temp');
+    await fs.writeFile(tempPath, req.file.buffer);
+    req.session.tempSaveFileName = req.file.originalname+'.temp';
     const saveData = {};
 
     lines.forEach((line, index) => {
@@ -50,125 +52,29 @@ async function processUploadChapter1(req, res, htmlTemplateFile, outputFile) {
     res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
   }
 }
+
 app.post('/deltarune1Demo/upload', upload.single('saveFile'), async (req, res) => {
-  await processUploadChapter1(req, res, 'deltarune1DemoEdit.html', 'Gdeltarune1DemoEdit.html');
+  await processUpload(req, res, [10318, 1], 'deltarune1DemoEdit.html', 'Gdeltarune1DemoEdit.html');
 });
 
 app.post('/deltarune1/upload', upload.single('saveFile'), async (req, res) => {
-  await processUploadChapter1(req, res, 'deltarune1Edit.html', 'Gdeltarune1Edit.html');
+  await processUpload(req, res, [10318, 1], 'deltarune1Edit.html', 'Gdeltarune1Edit.html');
 });
 
-async function processUploadChapter2(req, res, htmlTemplateFile, outputFile) {
-    try {
-    const fileBuffer = req.file.buffer;
-    const lines = fileBuffer.toString().split(/\r?\n/);
-    const originalName = req.file.originalname;
-    req.session.originalSaveFileName = originalName;
-    if (lines.length != 3055) {
-      return res.json({ err: `Not a valid Chapter 2 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 3055 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
-    }
-
-    const saveData = {};
-
-    lines.forEach((line, index) => {
-      saveData[`_${index + 1}`] = line.trim();
-    });
-
-    const htmlTemplatePath = path.join(__dirname, 'html', htmlTemplateFile);
-    let htmlContent = await fs.readFile(htmlTemplatePath, 'utf8');
-
-    htmlContent = htmlContent.replace(
-      /var\s+saveData\s*=\s*\{[^}]*\};/,
-      `var saveData = ${JSON.stringify(saveData)};`
-    );
-
-    const tempFilePath = path.join(__dirname, 'output', outputFile);
-    await fs.writeFile(tempFilePath, htmlContent);
-
-    res.json({ url: `/output/${outputFile}` });
-
-  } catch (err) {
-    console.error(err);
-    res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
-  }
-}
 app.post('/deltarune2Demo/upload', upload.single('saveFile'), async (req, res) => {
-  await processUploadChapter2(req, res, 'deltarune2DemoEdit.html', 'Gdeltarune2DemoEdit.html');
+  await processUpload(req, res, [3055, 2], 'deltarune2DemoEdit.html', 'Gdeltarune2DemoEdit.html');
 });
 
 app.post('/deltarune2/upload', upload.single('saveFile'), async (req, res) => {
-  await processUploadChapter2(req, res, 'deltarune2Edit.html', 'Gdeltarune2Edit.html');
+  await processUpload(req, res, [3055, 2], 'deltarune2Edit.html', 'Gdeltarune2Edit.html');
 });
 
 app.post('/deltarune3/upload', upload.single('saveFile'), async (req, res) => {
-     try {
-    const fileBuffer = req.file.buffer;
-    const lines = fileBuffer.toString().split(/\r?\n/);
-    const originalName = req.file.originalname;
-    req.session.originalSaveFileName = originalName;
-    
-    if (lines.length != 3055) {
-      return res.json({ err: `Not a valid Chapter 3 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 3055 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
-    }
-
-    const saveData = {};
-
-    lines.forEach((line, index) => {
-      saveData[`_${index + 1}`] = line.trim();
-    });
-
-    const htmlTemplatePath = path.join(__dirname, 'html', 'deltarune3Edit.html');
-    let htmlContent = await fs.readFile(htmlTemplatePath, 'utf8');
-
-    htmlContent = htmlContent.replace(
-      /var\s+saveData\s*=\s*\{[^}]*\};/,
-      `var saveData = ${JSON.stringify(saveData)};`
-    );
-
-    const tempFilePath = path.join(__dirname, 'output', 'Gdeltarune3Edit.html');
-    await fs.writeFile(tempFilePath, htmlContent);
-
-    res.json({ url: `/output/Gdeltarune3Edit.html` });
-
-  } catch (err) {
-    console.error(err);
-    res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
-  }
+     await processUpload(req, res, [3055, 3], 'deltarune3Edit.html', 'Gdeltarune3Edit.html');
 });
 
 app.post('/deltarune4/upload', upload.single('saveFile'), async (req, res) => {
-         try {
-    const fileBuffer = req.file.buffer;
-    const lines = fileBuffer.toString().split(/\r?\n/);
-    const originalName = req.file.originalname;
-    req.session.originalSaveFileName = originalName;
-    if (lines.length != 3055) {
-      return res.json({ err: `Not a valid Chapter 4 save file.\n Please ensure you are using the correct chapter editor. \n\n Was expecting 3055 lines, file has (${lines.length} lines.\n\nIf you believe this is an error, try loading and saving your file in-game.` });
-    }
-
-    const saveData = {};
-
-    lines.forEach((line, index) => {
-      saveData[`_${index + 1}`] = line.trim();
-    });
-
-    const htmlTemplatePath = path.join(__dirname, 'html', 'deltarune4Edit.html');
-    let htmlContent = await fs.readFile(htmlTemplatePath, 'utf8');
-
-    htmlContent = htmlContent.replace(
-      /var\s+saveData\s*=\s*\{[^}]*\};/,
-      `var saveData = ${JSON.stringify(saveData)};`
-    );
-
-    const tempFilePath = path.join(__dirname, 'output', 'Gdeltarune4Edit.html');
-    await fs.writeFile(tempFilePath, htmlContent);
-
-    res.json({ url: `/output/Gdeltarune4Edit.html` });
-
-  } catch (err) {
-    console.error(err);
-    res.json({ err: 'A apărut o eroare la procesarea fișierului.' });
-  }
+     await processUpload(req, res, [3055, 4], 'deltarune4Edit.html', 'Gdeltarune4Edit.html');
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -176,13 +82,14 @@ app.use(express.urlencoded({ extended: true }));
 async function handleSavefileUpdate(req, res, inputFilename, initialFilename, mode) {
   try {
     const ROOT_DIRECTORY = __dirname;
-    const inputPath = path.join(ROOT_DIRECTORY, 'defaultSaves', mode, initialFilename);
+    const saveFile = path.join('output', req.session.tempSaveFileName) || path.join('defaultSaves', mode, initialFilename);
+    const inputPath = path.join(ROOT_DIRECTORY, saveFile);
     const outputPath = path.join(ROOT_DIRECTORY, 'output', inputFilename);
 
     try {
       await fs.access(inputPath);
     } catch {
-      return res.status(500).send(`Fișierul original ${initialFilename} (${mode}) nu există.`);
+      return res.status(500).send(`Fișierul ${saveFile} (${mode}) nu există.`);
     }
 
     const lines = (await fs.readFile(inputPath, 'utf8')).split(/\r?\n/);
